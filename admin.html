@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SHEvyon, מנהלת קבוצות</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Rubik:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body class="admin-page">
+  <div class="bgp"></div>
+
+  <div class="ct sc on" style="gap:12px; padding-top:16px;">
+    <div class="gh">
+      <div class="gtn"><span style="font-size:18px;">🗂️</span> תצוגת מנהלת</div>
+      <div class="gbal" style="text-align:left;">
+        <a href="index.html" style="color:var(--gold); font-weight:800; text-decoration:none;">חזרה למשחק</a>
+      </div>
+    </div>
+
+    <div class="evc">
+      <div class="evt">סטטוס קבוצות לפי סוף שנה</div>
+      <div class="evd">
+        הטבלה מציגה לכל קבוצה את השווי בסוף כל שנה (2020 עד 2024) על בסיס הריצה האחרונה שנשמרה בדפדפן הזה.
+        אם אין נתונים לקבוצה, יוצג מקף.
+      </div>
+    </div>
+
+    <div class="alc" style="padding:14px;">
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
+        <div style="font-family:'Rubik',sans-serif; font-weight:800;">נתונים מקומיים (LocalStorage)</div>
+
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="kbtn" id="btnRefresh" style="margin:0;">רענון</button>
+          <button class="kbtn" id="btnClear" style="margin:0; border-color:var(--red); color:var(--red);">איפוס נתונים</button>
+        </div>
+      </div>
+
+      <div id="adminSummary" style="margin-top:10px; font-size:12px; color:var(--txt2);"></div>
+    </div>
+
+    <!-- שליטה מרכזית בשנים -->
+    <div class="alc" style="padding:14px;">
+      <div style="font-family:'Rubik',sans-serif; font-weight:800; margin-bottom:8px;">
+        שליטה מרכזית בשנים
+      </div>
+
+      <div id="yearStatus" style="font-size:12px; color:var(--txt2); margin-bottom:10px;"></div>
+
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="kbtn" id="open2020" style="margin:0;">פתחי 2020</button>
+        <button class="kbtn" id="open2021" style="margin:0;">פתחי 2021</button>
+        <button class="kbtn" id="open2022" style="margin:0;">פתחי 2022</button>
+        <button class="kbtn" id="open2023" style="margin:0;">פתחי 2023</button>
+        <button class="kbtn" id="open2024" style="margin:0;">פתחי 2024</button>
+      </div>
+    </div>
+
+    <div class="alc" style="padding:14px;">
+      <div id="adminTableWrap"></div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
