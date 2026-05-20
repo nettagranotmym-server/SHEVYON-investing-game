@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>SHEvyon, סימולציית תיק השקעות</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Rubik:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+  <div class="bgp"></div>
+
+  <div class="ct">
+    <!-- INTRO SCREEN -->
+    <div class="sc ws on" id="scrIntro">
+      <div style="animation:fid .5s ease-out">
+        <div class="logo">💼</div>
+        <div class="wt">ברוכות הבאות לסימולציית ההשקעות</div>
+      </div>
+
+      <div class="evc" style="text-align:right;">
+        <div class="evt">איך משחקות?</div>
+        <div class="evd">
+          התאריך עכשיו הוא ינואר 2020. קיבלתן במתנה ₪100,000 והחלטתן להשקיע אותו.<br>
+          אתן בונות כעת תיק השקעות ותצטרכו לתחזק אותו בכל שנה.<br><br>
+
+          המטרה שלכן היא להגיע לתחילת 2025 עם התיק שעשה את התשואה הכי גבוהה.<br>
+          בתיק יש חלק סולידי (אג"ח) וחלק מנייתי.<br><br>
+
+          בחלק המנייתי תוכלו לבחור השקעה בין 3 חברות (דמיוניות כמובן) שנמצאות בענפים שונים:<br><br>
+
+          <strong>CloudSpark</strong> (חברת טכנולוגייה שעוסקת בתשתיות ענן)<br>
+          <strong>MediPulse</strong> (חברת תרופות)<br>
+          <strong>ShieldWorks</strong> (חברה שעוסקת בפיתוח מערכות הגנה לצבא)<br><br>
+
+          <strong>הוראות קצרות:</strong><br>
+          באמצעות הכפתורים תוכלו לבצע את החלוקה של הכסף בין החברות השונות והאג"ח.<br>
+          בסוף כל שנה תוכלו לעדכן את החלוקה.<br><br>
+
+          <strong>מוכנות?</strong><br>
+          בואו נתחיל!
+        </div>
+      </div>
+
+      <button class="sbtn en" id="goToTeamsBtn">המשיכו לבחירת צוות ➡️</button>
+
+      <div style="margin-top:8px; font-size:12px; color:var(--txt3);">
+        מנהלת קבוצה? מעבר לעמוד המנהלת:
+        <a href="admin.html" style="color:var(--gold); font-weight:700; text-decoration:none;">admin.html</a>
+      </div>
+    </div>
+
+    <!-- WELCOME / TEAM SELECT -->
+    <div class="sc ws" id="scrWelcome">
+      <div style="animation:fid .5s ease-out">
+        <div class="logo">💼</div>
+        <div class="wt">סימולציית תיק השקעות</div>
+        <div class="wst">
+          בחרו צוות, בנו תיק, ובכל שנה תחליטו אם לעדכן או להישאר עם הבחירה שלכן.
+        </div>
+      </div>
+
+      <div class="tsa">
+        <div class="tsl">בחרו צוות:</div>
+        <div class="tg" id="teamGrid"></div>
+        <button class="sbtn" id="startBtn">יאללה, בונות תיק! 💼</button>
+      </div>
+    </div>
+
+    <!-- GAME -->
+    <div class="sc" id="scrGame">
+      <div class="gh">
+        <div class="gtn" id="gTeam"></div>
+        <div class="gbal">
+          <div class="gbs">שווי התיק</div>
+          <div class="gbv" id="gBal">₪100,000</div>
+        </div>
+      </div>
+
+      <div class="tmr">
+        <div class="tmr-l" id="gStep"></div>
+        <div class="tmr-t" id="gTitle"></div>
+        <div class="tmr-bw"><div class="tmr-b" id="gBar"></div></div>
+        <div class="tmr-v" id="gTime">1:30</div>
+      </div>
+
+      <div id="gContent"></div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="sc rs" id="scrResults">
+      <div class="rh">
+        <div class="rt">🏆</div>
+        <div class="rtt">סיכום 5 שנים</div>
+        <div class="rts" id="rTeam"></div>
+      </div>
+
+      <div class="fc">
+        <div class="fl">שווי תיק סופי</div>
+        <div class="fa" id="rAmount"></div>
+        <div class="fr" id="rReturn"></div>
+      </div>
+
+      <div class="bonus-card" id="bonusCard"></div>
+      <div class="det" id="rDetails"></div>
+
+      <div class="cta2">
+        <p>
+          עכשיו אתן יודעות שסבלנות ופיזור<br>
+          יכולים לעשות הבדל גדול לאורך זמן.
+        </p>
+        <button class="rbtn" id="restartBtn">שחקו שוב 🔄</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
