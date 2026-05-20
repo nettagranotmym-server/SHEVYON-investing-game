@@ -13,38 +13,22 @@
   <div class="bgp"></div>
 
   <div class="ct">
-    <!-- INTRO SCREEN -->
-    <div class="sc ws on" id="scrIntro">
+
+    <!-- מסך 1: בחירת צוות -->
+    <div class="sc ws on" id="scrWelcome">
       <div style="animation:fid .5s ease-out">
         <div class="logo">💼</div>
-        <div class="wt">ברוכות הבאות לסימולציית ההשקעות</div>
+        <div class="wt">סימולציית תיק השקעות</div>
+        <div class="wt-divider">— ✦ —</div>
       </div>
 
-      <div class="evc" style="text-align:right;">
-        <div class="evt">איך משחקות?</div>
-        <div class="evd">
-          התאריך עכשיו הוא ינואר 2020. קיבלתן במתנה ₪100,000 והחלטתן להשקיע אותו.<br>
-          אתן בונות כעת תיק השקעות ותצטרכו לתחזק אותו בכל שנה.<br><br>
-
-          המטרה שלכן היא להגיע לתחילת 2025 עם התיק שעשה את התשואה הכי גבוהה.<br>
-          בתיק יש חלק סולידי (אג"ח) וחלק מנייתי.<br><br>
-
-          בחלק המנייתי תוכלו לבחור השקעה בין 3 חברות (דמיוניות כמובן) שנמצאות בענפים שונים:<br><br>
-
-          <strong>CloudSpark</strong> (חברת טכנולוגייה שעוסקת בתשתיות ענן)<br>
-          <strong>MediPulse</strong> (חברת תרופות)<br>
-          <strong>ShieldWorks</strong> (חברה שעוסקת בפיתוח מערכות הגנה לצבא)<br><br>
-
-          <strong>הוראות קצרות:</strong><br>
-          באמצעות הכפתורים תוכלו לבצע את החלוקה של הכסף בין החברות השונות והאג"ח.<br>
-          בסוף כל שנה תוכלו לעדכן את החלוקה.<br><br>
-
-          <strong>מוכנות?</strong><br>
-          בואו נתחיל!
-        </div>
+      <div class="tsa">
+        <div class="tsl">בחרו צוות:</div>
+        <div class="tg" id="teamGrid"></div>
+        <button class="sbtn" id="startBtn">המשך להסבר ➡️</button>
       </div>
 
-      <button class="sbtn en" id="goToTeamsBtn">המשיכו לבחירת צוות ➡️</button>
+      <div class="brand-footer">אפליקציה מבית <span>SHEvyon</span></div>
 
       <div style="margin-top:8px; font-size:12px; color:var(--txt3);">
         מנהלת קבוצה? מעבר לעמוד המנהלת:
@@ -52,21 +36,37 @@
       </div>
     </div>
 
-    <!-- WELCOME / TEAM SELECT -->
-    <div class="sc ws" id="scrWelcome">
+    <!-- מסך 2: הסבר על המשחק -->
+    <div class="sc ws" id="scrIntro">
       <div style="animation:fid .5s ease-out">
         <div class="logo">💼</div>
-        <div class="wt">סימולציית תיק השקעות</div>
-        <div class="wst">
-          בחרו צוות, בנו תיק, ובכל שנה תחליטו אם לעדכן או להישאר עם הבחירה שלכן.
+        <div class="wt">איך משחקות?</div>
+      </div>
+
+      <div class="evc" style="text-align:right;">
+        <div class="evd">
+          התאריך עכשיו הוא <strong>ינואר 2020</strong>. קיבלתן במתנה ₪100,000 והחלטתן להשקיע אותו.<br>
+          אתן בונות כעת תיק השקעות ותצטרכו לתחזק אותו בכל שנה.<br><br>
+
+          המטרה שלכן היא להגיע לתחילת 2025 עם התיק שעשה את התשואה הכי גבוהה.<br>
+          בתיק יש חלק סולידי (אג"ח) וחלק מנייתי.<br><br>
+
+          בחלק המנייתי תוכלו לבחור השקעה בין 3 חברות (דמיוניות כמובן):<br><br>
+
+          <strong>☁️ CloudSpark</strong> — חברת טכנולוגיה, תשתיות ענן<br>
+          <strong>💊 MediPulse</strong> — חברת תרופות<br>
+          <strong>🛡️ ShieldWorks</strong> — פיתוח מערכות הגנה לצבא<br><br>
+
+          <strong>איך משחקות?</strong><br>
+          הזיזו את הסליידרים כדי לחלק את הכסף — הסכום חייב להסתכם ל-100%.<br>
+          בסוף כל שנה תוכלו לשנות את החלוקה (אבל שינוי עולה עמלה!).<br><br>
+
+          <strong>מוכנות? בואו נתחיל! 🚀</strong>
         </div>
       </div>
 
-      <div class="tsa">
-        <div class="tsl">בחרו צוות:</div>
-        <div class="tg" id="teamGrid"></div>
-        <button class="sbtn" id="startBtn">יאללה, בונות תיק! 💼</button>
-      </div>
+      <button class="sbtn en" id="goToGameBtn">יאללה, בונות תיק! 💼</button>
+      <div class="brand-footer">אפליקציה מבית <span>SHEvyon</span></div>
     </div>
 
     <!-- GAME -->

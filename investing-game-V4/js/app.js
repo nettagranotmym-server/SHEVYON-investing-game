@@ -48,8 +48,11 @@ function selTeam(id) {
 }
 
 function bindButtons() {
-  document.getElementById("goToTeamsBtn").addEventListener("click", () => show("scrWelcome"));
-  document.getElementById("startBtn").addEventListener("click", startGame);
+  document.getElementById("startBtn").addEventListener("click", () => {
+    if (!S.team) return;
+    show("scrIntro");
+  });
+  document.getElementById("goToGameBtn").addEventListener("click", startGame);
   document.getElementById("restartBtn").addEventListener("click", restart);
 }
 
@@ -133,7 +136,7 @@ function showAllocScreen() {
       <div class="evc">
         <div class="evi">${INTRO.icon}</div>
         <div class="evt">${INTRO.title}</div>
-        <div class="evd">${INTRO.desc}</div>
+        <div class="evd">${INTRO.desc.replace(/\n/g, "<br>")}</div>
       </div>
     `;
   } else {
@@ -141,7 +144,7 @@ function showAllocScreen() {
       <div class="evc">
         <div class="evi">${yr.icon}</div>
         <div class="evt">${yr.title}</div>
-        <div class="evd">${yr.desc}</div>
+        <div class="evd">${yr.desc.replace(/\n/g, "<br>")}</div>
       </div>
     `;
   }
@@ -335,10 +338,11 @@ function showYearResult(yr, details, oldTotal, commission) {
   }
 
   let html = `<div class="yrc">
+    <div class="yr-title">סיכום שנה בתיק ההשקעות שלך</div>
     <div class="yr-i">${isPos ? "📈" : "📉"}</div>
     <div class="yr-ch ${isPos ? "pos" : "neg"}">${isPos ? "+" : ""}${change.toFixed(1)}%</div>
     ${commissionHtml}
-    <div class="yr-ex">${yr.lesson}</div>
+    <div class="yr-ex">${yr.lesson.replace(/\n/g, "<br>")}</div>
     <div class="yr-bd">
   `;
 
@@ -537,12 +541,12 @@ function restart() {
 
   document.querySelectorAll(".tb").forEach(b => b.classList.remove("sel"));
   document.getElementById("startBtn").classList.remove("en");
-  show("scrIntro");
+  show("scrWelcome");
 }
 
 // ===== INIT =====
 (function init() {
   renderTeams();
   bindButtons();
-  show("scrIntro");
+  show("scrWelcome");
 })();
