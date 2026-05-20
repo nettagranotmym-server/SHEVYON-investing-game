@@ -1,34 +1,23 @@
-// ===== CONFIG (חדש) =====
-const CONTROLLED_BY_ADMIN = false; // כרגע false עד שמחברים ל-Render
-const API_BASE = ""; // נשים URL של Render בהמשך
-let socket = null;
+// ===== CONFIG =====
+const CONTROLLED_BY_ADMIN = true; // המנהלת שולטת בפתיחת שנים
 
 // ===== STATE =====
 let S = {
   team: null,
-
-  // אחוזים שמוצגים בסליידרים
   alloc: { bond: 25, cloud: 25, medi: 25, shield: 25 },
-
-  // אחוזים מקוריים והאחרונים שאושרו (לתצוגה בלבד)
   origAlloc: null,
   prevAlloc: null,
-
-  // הסכומים בפועל שמושקעים בכל נכס (זה מה שצריך "לרוץ" משנה לשנה)
   portfolio: { bond: 25000, cloud: 25000, medi: 25000, shield: 25000 },
-
   total: TOTAL,
   year: -1,
   changes: 0,
   totalCommissions: 0,
   yearHistory: [],
-
   timer: null,
   timeLeft: TIMER_SEC,
   phase: "alloc",
-
-  // חדש: האם המשתמשת הזיזה סליידר השנה
-  touchedThisYear: false
+  touchedThisYear: false,
+  _pollInterval: null // לשמירת interval של ההמתנה
 };
 
 // ===== DOM HELPERS =====
@@ -53,16 +42,17 @@ function renderTeams() {
 function selTeam(id) {
   S.team = TEAMS.find(t => t.id === id) || null;
   document.querySelectorAll(".tb").forEach(b => b.classList.remove("sel"));
-
   const chosen = document.querySelector(`.tb[data-id="${id}"]`);
   if (chosen) chosen.classList.add("sel");
-
   document.getElementById("startBtn").classList.add("en");
 }
 
 function bindButtons() {
-  document.getElementById("goToTeamsBtn").addEventListener("click", () => show("scrWelcome"));
-  document.getElementById("startBtn").addEventListener("click", startGame);
+  document.getElementById("startBtn").addEventListener("click", () => {
+    if (!S.team) return;
+    show("scrIntro");
+  });
+  document.getElementById("goToGameBtn").addEventListener("click", startGame);
   document.getElementById("restartBtn").addEventListener("click", restart);
 }
 
@@ -73,17 +63,14 @@ function startGame() {
   S.alloc = { bond: 25, cloud: 25, medi: 25, shield: 25 };
   S.origAlloc = null;
   S.prevAlloc = null;
-
-  // מתחילים עם סכומים בפועל
   S.portfolio = { bond: 25000, cloud: 25000, medi: 25000, shield: 25000 };
-
   S.total = TOTAL;
   S.year = -1;
   S.changes = 0;
   S.totalCommissions = 0;
   S.yearHistory = [];
-
   S.touchedThisYear = false;
+  S._pollInterval = null;
 
   show("scrGame");
   document.getElementById("gTeam").innerHTML = `<span>${S.team.e}</span> ${S.team.n}`;
@@ -129,7 +116,7 @@ function autoConfirm() {
 // ===== ALLOCATION SCREEN =====
 function showAllocScreen() {
   S.phase = "alloc";
-  S.touchedThisYear = false; // חדש: בתחילת כל שנה, עוד לא נגעו
+  S.touchedThisYear = false;
 
   const isIntro = S.year === -1;
   const yr = isIntro ? null : YEARS[S.year];
@@ -149,7 +136,7 @@ function showAllocScreen() {
       <div class="evc">
         <div class="evi">${INTRO.icon}</div>
         <div class="evt">${INTRO.title}</div>
-        <div class="evd">${INTRO.desc}</div>
+        <div class="evd">${INTRO.desc.replace(/\n/g, "<br>")}</div>
       </div>
     `;
   } else {
@@ -157,7 +144,7 @@ function showAllocScreen() {
       <div class="evc">
         <div class="evi">${yr.icon}</div>
         <div class="evt">${yr.title}</div>
-        <div class="evd">${yr.desc}</div>
+        <div class="evd">${yr.desc.replace(/\n/g, "<br>")}</div>
       </div>
     `;
   }
@@ -194,7 +181,7 @@ function showAllocScreen() {
 
   ASSETS.forEach(a => {
     document.getElementById(`sl_${a.key}`).addEventListener("input", () => {
-      S.touchedThisYear = true; // חדש: ברגע שמזיזים סליידר
+      S.touchedThisYear = true;
       updSliders();
     });
   });
@@ -238,33 +225,23 @@ function confirmAlloc() {
 
   clearInterval(S.timer);
 
-  // ===== INTRO (הקמה ראשונית של הסכומים בפועל) =====
   if (S.year === -1) {
     S.origAlloc = { ...S.alloc };
     S.prevAlloc = { ...S.alloc };
-
-    // פעם ראשונה בלבד: ממירים אחוזים לסכומים אמיתיים
     ASSETS.forEach(a => {
       S.portfolio[a.key] = S.total * S.alloc[a.key] / 100;
     });
-
     S.year = 0;
-    applyYear(false, 0, true); // בשנה הראשונה זה כן "שווה ערך" לרה איזון ראשוני
+    applyYear(false, 0, true);
     return;
   }
 
-  // ===== שנים 2021-2024 =====
-
-  // אם לא נגעו בסליידרים בכלל השנה:
-  // אין עמלה, ואין רה איזון. פשוט ממשיכים עם אותם סכומים לשנה הבאה.
   if (!S.touchedThisYear) {
-    S.prevAlloc = { ...S.alloc }; // לשמירה עקבית של מה שמוצג
-    applyYear(false, 0, false);   // doRebalance=false
+    S.prevAlloc = { ...S.alloc };
+    applyYear(false, 0, false);
     return;
   }
 
-  // אם כן נגעו, אז עושים רה איזון לפי האחוזים החדשים,
-  // וגובים עמלה רק אם באמת יש שינוי לעומת prevAlloc.
   let amountMoved = 0;
   let changed = false;
 
@@ -287,20 +264,18 @@ function confirmAlloc() {
   }
 
   S.prevAlloc = { ...S.alloc };
-  applyYear(changed, commission, true); // doRebalance=true
+  applyYear(changed, commission, true);
 }
 
 // ===== APPLY YEAR =====
 function applyYear(changed, commission, doRebalance = true) {
   const yr = YEARS[S.year];
 
-  // אם עושים רה איזון, מחשבים מחדש את הסכומים לפי אחוזים
   if (doRebalance) {
     ASSETS.forEach(a => {
       S.portfolio[a.key] = S.total * S.alloc[a.key] / 100;
     });
   }
-  // אם לא עושים רה איזון, משאירים את S.portfolio כמו שהוא
 
   const details = [];
   let newTotal = 0;
@@ -317,7 +292,6 @@ function applyYear(changed, commission, doRebalance = true) {
   const oldTotal = S.total;
   S.total = newTotal;
 
-  // אחרי שהסכומים גדלו/קטנו, מעדכנים אחוזים לתצוגה בלבד
   ASSETS.forEach(a => {
     S.alloc[a.key] = S.total > 0 ? Math.round((S.portfolio[a.key] / S.total) * 100) : 25;
   });
@@ -334,7 +308,7 @@ function applyYear(changed, commission, doRebalance = true) {
     totalBefore: oldTotal,
     totalAfter: S.total
   });
-  // שמירת מצב ביניים למנהלת אחרי כל שנה
+
   upsertTeamProgress({
     ts: Date.now(),
     teamId: S.team.id,
@@ -348,6 +322,7 @@ function applyYear(changed, commission, doRebalance = true) {
   showYearResult(yr, details, oldTotal, commission);
 }
 
+// ===== YEAR RESULT =====
 function showYearResult(yr, details, oldTotal, commission) {
   S.phase = "result";
   const change = ((S.total - oldTotal) / oldTotal) * 100;
@@ -363,10 +338,11 @@ function showYearResult(yr, details, oldTotal, commission) {
   }
 
   let html = `<div class="yrc">
+    <div class="yr-title">סיכום שנה בתיק ההשקעות שלך</div>
     <div class="yr-i">${isPos ? "📈" : "📉"}</div>
     <div class="yr-ch ${isPos ? "pos" : "neg"}">${isPos ? "+" : ""}${change.toFixed(1)}%</div>
     ${commissionHtml}
-    <div class="yr-ex">${yr.lesson}</div>
+    <div class="yr-ex">${yr.lesson.replace(/\n/g, "<br>")}</div>
     <div class="yr-bd">
   `;
 
@@ -383,38 +359,34 @@ function showYearResult(yr, details, oldTotal, commission) {
     </div>`;
   });
 
+  const isLastYear = S.year >= 4;
+
   html += `</div>
     <div class="yr-bal">
       <div class="yr-bl">שווי התיק</div>
       <div class="yr-bv">${fmt(S.total)}</div>
     </div>
     <button class="nbtn" id="nextBtn">
-      ${S.year < 4 ? "לשנה הבאה ➡️" : "לתוצאות הסופיות 🏆"}
+      ${isLastYear ? "לתוצאות הסופיות 🏆" : "לשנה הבאה ➡️"}
     </button>
   </div>`;
 
   document.getElementById("gContent").innerHTML = html;
 
-  document.getElementById("nextBtn").addEventListener("click", () => {
-    if (!CONTROLLED_BY_ADMIN) {
-      nextYear();
-      return;
-    }
-
-    const btn = document.getElementById("nextBtn");
-    btn.disabled = true;
-    btn.textContent = "ממתינות למנהלת...";
-
-    // כשנחבר socket בעתיד, פה נודיע לשרת שהקבוצה מוכנה
-    // socket.emit("team:ready", { teamId: S.team.id, stage: "yearReady" });
-  });
+  document.getElementById("nextBtn").addEventListener("click", () => nextYear());
 }
 
-function nextYear() {
-  // השנה הבאה שהולכים אליה
+// ===== NEXT YEAR (בדיקת שרת) =====
+async function nextYear() {
+  // עצירת polling קודם אם היה
+  if (S._pollInterval) {
+    clearInterval(S._pollInterval);
+    S._pollInterval = null;
+  }
+
   const nextIndex = S.year + 1;
 
-  // אם כבר עברנו את כל השנים, רגיל
+  // סוף המשחק
   if (nextIndex >= 5) {
     S.year = nextIndex;
     showResults();
@@ -422,19 +394,54 @@ function nextYear() {
   }
 
   const nextYearValue = YEARS[nextIndex].year;
-  const openYear = getAdminOpenYear();
+
+  // בדיקה מול השרת אם השנה פתוחה
+  const openYear = await serverGetOpenYear();
 
   if (nextYearValue > openYear) {
-    alert(`השנה ${nextYearValue} עדיין לא נפתחה. ממתינות למנהלת.`);
+    // השנה עדיין סגורה — מציגים מסך המתנה
+    showWaitingForAdmin(nextYearValue, nextIndex);
     return;
   }
 
+  // השנה פתוחה — ממשיכים
   S.year = nextIndex;
   document.getElementById("gBal").textContent = fmt(S.total);
   showAllocScreen();
 }
 
-// ===== RESULTS + SAVE =====
+// ===== WAITING SCREEN =====
+function showWaitingForAdmin(yearValue, yearIndex) {
+  document.getElementById("gContent").innerHTML = `
+    <div class="evc" style="text-align:center; padding:24px 16px;">
+      <div class="evi">⏳</div>
+      <div class="evt">ממתינות לפתיחת ${yearValue}</div>
+      <div class="evd">
+        המנהלת תפתח את השנה הבאה בקרוב.<br>
+        הדף יתעדכן אוטומטית, אין צורך לרענן.
+      </div>
+      <div style="margin-top:16px; font-size:11px; color:var(--txt3);" id="waitDots">בודקות...</div>
+    </div>
+  `;
+
+  let dots = 0;
+  S._pollInterval = setInterval(async () => {
+    dots = (dots + 1) % 4;
+    const el = document.getElementById("waitDots");
+    if (el) el.textContent = "בודקות" + ".".repeat(dots + 1);
+
+    const openYear = await serverGetOpenYear();
+    if (yearValue <= openYear) {
+      clearInterval(S._pollInterval);
+      S._pollInterval = null;
+      S.year = yearIndex;
+      document.getElementById("gBal").textContent = fmt(S.total);
+      showAllocScreen();
+    }
+  }, 3000); // בודקות כל 3 שניות
+}
+
+// ===== RESULTS =====
 function showResults() {
   show("scrResults");
 
@@ -502,7 +509,7 @@ function showResults() {
     teamId: S.team.id,
     teamName: S.team.n,
     teamEmoji: S.team.e,
-    finalTotal: finalTotal,
+    finalTotal,
     totalCommissions: S.totalCommissions,
     changes: S.changes,
     yearTotals: S.yearHistory.map(y => ({ year: y.year, totalAfter: y.totalAfter }))
@@ -511,6 +518,9 @@ function showResults() {
 
 // ===== RESTART =====
 function restart() {
+  if (S._pollInterval) {
+    clearInterval(S._pollInterval);
+  }
   S = {
     team: null,
     alloc: { bond: 25, cloud: 25, medi: 25, shield: 25 },
@@ -525,17 +535,18 @@ function restart() {
     timer: null,
     timeLeft: TIMER_SEC,
     phase: "alloc",
-    touchedThisYear: false
+    touchedThisYear: false,
+    _pollInterval: null
   };
 
   document.querySelectorAll(".tb").forEach(b => b.classList.remove("sel"));
   document.getElementById("startBtn").classList.remove("en");
-  show("scrIntro");
+  show("scrWelcome");
 }
 
 // ===== INIT =====
 (function init() {
   renderTeams();
   bindButtons();
-  show("scrIntro");
+  show("scrWelcome");
 })();
