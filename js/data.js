@@ -120,7 +120,31 @@ function setAdminOpenYear(year) {
 
 // ===== SERVER API FUNCTIONS =====
 
-// שליפת השנה הפתוחה מהשרת
+// שליפת קבוצות תפוסות
+async function serverGetTakenTeams() {
+  try {
+    const res = await fetch(`${API_BASE}/api/teams`);
+    return await res.json();
+  } catch (e) {
+    console.warn("Could not fetch taken teams:", e);
+    return {};
+  }
+}
+
+// תפיסת קבוצה
+async function serverClaimTeam(teamId, teamName) {
+  try {
+    const res = await fetch(`${API_BASE}/api/teams`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ teamId, teamName })
+    });
+    return res.ok;
+  } catch (e) {
+    console.warn("Could not claim team:", e);
+    return false;
+  }
+}
 async function serverGetOpenYear() {
   try {
     const res = await fetch(`${API_BASE}/api/year`);

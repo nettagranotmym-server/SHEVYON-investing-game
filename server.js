@@ -12,9 +12,10 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname))); // מגיש את קבצי הפרונטאנד (HTML/CSS/JS)
 
 // ===== MEMORY STORAGE =====
-let runs = [];       // תוצאות סופיות
-let progress = [];   // מצב ביניים
-let openYear = 2020; // שנה פתוחה כרגע
+let runs = [];
+let progress = [];
+let openYear = 2020;
+let takenTeams = {}; // { teamId: teamName }
 
 // ===== HEALTH CHECK =====
 app.get("/api/health", (req, res) => {
@@ -40,6 +41,20 @@ app.delete("/api/runs", (req, res) => {
   runs = [];
   progress = [];
   openYear = 2020;
+  takenTeams = {};
+  res.json({ ok: true });
+});
+
+// ===== TEAM CLAIMING =====
+app.get("/api/teams", (req, res) => {
+  res.json(takenTeams);
+});
+
+app.post("/api/teams", (req, res) => {
+  const { teamId, teamName } = req.body;
+  if (!teamId) return res.status(400).json({ error: "Invalid teamId" });
+  if (takenTeams[teamId]) return res.status(409).json({ error: "Team already taken" });
+  takenTeams[teamId] = teamName || "unknown";
   res.json({ ok: true });
 });
 

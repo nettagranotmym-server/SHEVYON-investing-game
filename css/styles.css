@@ -656,3 +656,14 @@ input[type=range]::-moz-range-thumb {
   padding: 6px;
   flex-shrink: 0;
 }
+
+/* Taken/locked team button */
+.tb-taken {
+  opacity: 0.4;
+  cursor: not-allowed !important;
+  border-color: var(--brd) !important;
+  background: var(--card) !important;
+  box-shadow: none !important;
+}
+
+.tb-taken:hover::before { opacity: 0 !important; }

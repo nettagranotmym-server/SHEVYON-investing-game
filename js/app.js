@@ -28,18 +28,30 @@ function show(id) {
 }
 
 // ===== TEAMS UI =====
-function renderTeams() {
+async function renderTeams() {
   const grid = document.getElementById("teamGrid");
-  grid.innerHTML = TEAMS.map(t =>
-    `<button class="tb" data-id="${t.id}"><span class="te">${t.e}</span>${t.n}</button>`
-  ).join("");
+  const taken = await serverGetTakenTeams();
 
-  grid.querySelectorAll(".tb").forEach(btn => {
+  grid.innerHTML = TEAMS.map(t => {
+    const isTaken = !!taken[t.id];
+    return `<button class="tb ${isTaken ? "tb-taken" : ""}" data-id="${t.id}" ${isTaken ? "disabled" : ""}>
+      <span class="te">${isTaken ? "🔒" : t.e}</span>
+      <span style="font-size:9px; ${isTaken ? "color:var(--txt3);" : ""}">${t.n}</span>
+    </button>`;
+  }).join("");
+
+  grid.querySelectorAll(".tb:not(.tb-taken)").forEach(btn => {
     btn.addEventListener("click", () => selTeam(parseInt(btn.dataset.id)));
   });
 }
 
-function selTeam(id) {
+async function selTeam(id) {
+  const taken = await serverGetTakenTeams();
+  if (taken[id]) {
+    renderTeams();
+    return;
+  }
+
   S.team = TEAMS.find(t => t.id === id) || null;
   document.querySelectorAll(".tb").forEach(b => b.classList.remove("sel"));
   const chosen = document.querySelector(`.tb[data-id="${id}"]`);
@@ -47,12 +59,42 @@ function selTeam(id) {
   document.getElementById("startBtn").classList.add("en");
 }
 
+// פולינג לעדכון נעילות כל 5 שניות
+function startTeamPolling() {
+  setInterval(async () => {
+    const grid = document.getElementById("teamGrid");
+    if (!grid) return;
+    const taken = await serverGetTakenTeams();
+    TEAMS.forEach(t => {
+      const btn = document.querySelector(`.tb[data-id="${t.id}"]`);
+      if (!btn) return;
+      if (taken[t.id] && !btn.classList.contains("sel")) {
+        btn.classList.add("tb-taken");
+        btn.disabled = true;
+        btn.querySelector(".te").textContent = "🔒";
+      }
+    });
+  }, 5000);
+}
+
 function bindButtons() {
   document.getElementById("startBtn").addEventListener("click", () => {
     if (!S.team) return;
     show("scrIntro");
   });
-  document.getElementById("goToGameBtn").addEventListener("click", startGame);
+  document.getElementById("goToGameBtn").addEventListener("click", async () => {
+    if (!S.team) return;
+    const ok = await serverClaimTeam(S.team.id, S.team.n);
+    if (!ok) {
+      alert(`${S.team.n} כבר נתפסה! בחרו דרקון אחר.`);
+      S.team = null;
+      document.getElementById("startBtn").classList.remove("en");
+      show("scrWelcome");
+      renderTeams();
+      return;
+    }
+    startGame();
+  });
   document.getElementById("restartBtn").addEventListener("click", restart);
 }
 
@@ -548,5 +590,6 @@ function restart() {
 (function init() {
   renderTeams();
   bindButtons();
+  startTeamPolling();
   show("scrWelcome");
 })();
