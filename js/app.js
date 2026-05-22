@@ -176,12 +176,25 @@ function showAllocScreen() {
 
   let html = "";
 
+  // באנר ניסיון
+  if (S.isPractice) {
+    html += `
+      <div style="background:rgba(246,195,67,.12); border:1px solid rgba(246,195,67,.3); border-radius:10px; padding:10px 14px; margin-bottom:10px; text-align:center;">
+        <div style="font-family:'Rubik',sans-serif; font-weight:700; color:var(--gold); font-size:14px;">🎯 שנת ניסיון — לא נספרת לתוצאות</div>
+        <div style="font-size:12px; color:var(--txt2); margin-top:3px;">זו הזדמנות להבין איך המשחק עובד לפני שמתחילות באמת</div>
+      </div>
+    `;
+  }
+
   if (isIntro) {
     html += `
       <div class="evc">
         <div class="evi">${INTRO.icon}</div>
-        <div class="evt">${INTRO.title}</div>
-        <div class="evd">${INTRO.desc.replace(/\n/g, "<br>")}</div>
+        <div class="evt">${S.isPractice ? "בואי נעשה ניסיון לפני שמתחילות לשחק!" : INTRO.title}</div>
+        <div class="evd">${S.isPractice
+          ? "כדי להבין איך המשחק עובד — נעשה יחד סיבוב אחד של שנת 2020. בחרו חלוקה בין האפיקים וראו מה קורה. זה לא ייחשב לתוצאות!"
+          : INTRO.desc.replace(/\n/g, "<br>")
+        }</div>
       </div>
     `;
   } else {
@@ -216,9 +229,13 @@ function showAllocScreen() {
     `;
   });
 
+  const btnLabel = isIntro
+    ? (S.isPractice ? "🎯 התחילו את הניסיון!" : "יאללה, מתחילות! 🚀")
+    : "אישור ➡️";
+
   html += `
       <div class="aw" id="allocWarn">⚠️ הסכום חייב להסתכם ב 100%</div>
-      <button class="cbtn" id="allocBtn">${isIntro ? "יאללה, מתחילות! 🚀" : "אישור ➡️"}</button>
+      <button class="cbtn" id="allocBtn">${btnLabel}</button>
     </div>
   `;
 
@@ -508,16 +525,19 @@ function showRealGameStart() {
       <div class="evi">🚀</div>
       <div class="evt" style="color:var(--gold); font-size:22px;">עכשיו מתחילות באמת!</div>
       <div class="evd" style="margin-top:8px;">
-        חוזרות לבחירת הדרקון שלכן<br>והמשחק האמיתי מתחיל!
+        המשחק האמיתי מתחיל עכשיו —<br>
+        אותה קבוצה, מתחילות מ-2020 מחדש!
       </div>
     </div>
   `;
 
   setTimeout(() => {
-    // איפוס מלא וחזרה לבחירת צוות
+    // איפוס רק של נתוני המשחק — שומרים את הקבוצה!
+    const savedTeam = S.team;
     clearInterval(S.timer);
+
     S = {
-      team: null,
+      team: savedTeam, // שומרים את אותה קבוצה!
       alloc: { bond: 25, cloud: 25, medi: 25, shield: 25 },
       origAlloc: null, prevAlloc: null,
       portfolio: { bond: 25000, cloud: 25000, medi: 25000, shield: 25000 },
@@ -528,10 +548,12 @@ function showRealGameStart() {
       isPractice: false, // עכשיו משחק אמיתי!
       _pollInterval: null
     };
-    document.querySelectorAll(".tb").forEach(b => b.classList.remove("sel"));
-    document.getElementById("startBtn").classList.remove("en");
-    renderTeams();
-    show("scrWelcome");
+
+    // מעדכנים את שם הקבוצה בheader
+    document.getElementById("gTeam").innerHTML = `<span>${savedTeam.e}</span> ${savedTeam.n}`;
+    document.getElementById("gBal").textContent = fmt(TOTAL);
+
+    showAllocScreen();
   }, 3000);
 }
 
