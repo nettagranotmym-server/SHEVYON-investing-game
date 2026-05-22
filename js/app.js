@@ -17,7 +17,8 @@ let S = {
   timeLeft: TIMER_SEC,
   phase: "alloc",
   touchedThisYear: false,
-  _pollInterval: null // לשמירת interval של ההמתנה
+  isPractice: true,
+  _pollInterval: null
 };
 
 // ===== DOM HELPERS =====
@@ -164,10 +165,12 @@ function showAllocScreen() {
   const yr = isIntro ? null : YEARS[S.year];
 
   if (isIntro) {
-    document.getElementById("gStep").textContent = "הכנת התיק";
+    document.getElementById("gStep").textContent = S.isPractice ? "🎯 שנת ניסיון" : "הכנת התיק";
     document.getElementById("gTitle").textContent = `${INTRO.icon} בניית תיק ההשקעות`;
   } else {
-    document.getElementById("gStep").textContent = `שנה ${S.year + 1} מתוך 5`;
+    document.getElementById("gStep").textContent = S.isPractice
+      ? `🎯 ניסיון — ${yr.year}`
+      : `שנה ${S.year + 1} מתוך 5`;
     document.getElementById("gTitle").textContent = `${yr.icon} ${yr.year}`;
   }
 
@@ -201,7 +204,7 @@ function showAllocScreen() {
         <div class="sh">
           <div class="sl">
             <span class="sli" style="background:${a.bg};color:${a.color}">${a.icon}</span>
-            ${a.name}
+            ${a.name} <span style="font-size:10px; color:var(--txt3); font-weight:400;">(${a.sector})</span>
           </div>
           <div>
             <span class="sv" id="pct_${a.key}">${S.alloc[a.key]}%</span>
@@ -351,15 +354,30 @@ function applyYear(changed, commission, doRebalance = true) {
     totalAfter: S.total
   });
 
-  upsertTeamProgress({
-    ts: Date.now(),
-    teamId: S.team.id,
-    teamName: S.team.n,
-    teamEmoji: S.team.e,
-    currentYear: yr.year,
-    totalNow: S.total,
-    yearTotals: S.yearHistory.map(y => ({ year: y.year, totalAfter: y.totalAfter }))
-  });
+  // שומרים התקדמות רק במשחק אמיתי
+  if (!S.isPractice) {
+    upsertTeamProgress({
+      ts: Date.now(),
+      teamId: S.team.id,
+      teamName: S.team.n,
+      teamEmoji: S.team.e,
+      currentYear: yr.year,
+      totalNow: S.total,
+      yearTotals: S.yearHistory.map(y => ({ year: y.year, totalAfter: y.totalAfter }))
+    });
+  } else {
+    // בניסיון — שומרים עם סימון ניסיון
+    upsertTeamProgress({
+      ts: Date.now(),
+      teamId: S.team.id,
+      teamName: S.team.n + " (ניסיון)",
+      teamEmoji: S.team.e,
+      currentYear: yr.year,
+      totalNow: S.total,
+      isPractice: true,
+      yearTotals: S.yearHistory.map(y => ({ year: y.year, totalAfter: y.totalAfter }))
+    });
+  }
 
   showYearResult(yr, details, oldTotal, commission);
 }
@@ -420,7 +438,6 @@ function showYearResult(yr, details, oldTotal, commission) {
 
 // ===== NEXT YEAR (בדיקת שרת) =====
 async function nextYear() {
-  // עצירת polling קודם אם היה
   if (S._pollInterval) {
     clearInterval(S._pollInterval);
     S._pollInterval = null;
@@ -435,21 +452,87 @@ async function nextYear() {
     return;
   }
 
-  const nextYearValue = YEARS[nextIndex].year;
+  // אחרי שנת הניסיון — מסך המתנה לאיפוס
+  if (S.isPractice && S.year === 0) {
+    showPracticeWaiting();
+    return;
+  }
 
-  // בדיקה מול השרת אם השנה פתוחה
+  const nextYearValue = YEARS[nextIndex].year;
   const openYear = await serverGetOpenYear();
 
   if (nextYearValue > openYear) {
-    // השנה עדיין סגורה — מציגים מסך המתנה
     showWaitingForAdmin(nextYearValue, nextIndex);
     return;
   }
 
-  // השנה פתוחה — ממשיכים
   S.year = nextIndex;
   document.getElementById("gBal").textContent = fmt(S.total);
   showAllocScreen();
+}
+
+// ===== PRACTICE WAITING SCREEN =====
+function showPracticeWaiting() {
+  document.getElementById("gContent").innerHTML = `
+    <div class="evc" style="text-align:center; padding:28px 16px;">
+      <div class="evi">🎉</div>
+      <div class="evt" style="color:var(--gold);">כל הכבוד! סיימתן את הניסיון</div>
+      <div class="evd" style="margin-top:8px;">
+        עכשיו אתן יודעות איך המשחק עובד!<br><br>
+        המנהלת תאפס את הנתונים ותפתח את המשחק האמיתי.<br>
+        הדף יתעדכן אוטומטית.
+      </div>
+      <div style="margin-top:20px; font-size:11px; color:var(--txt3);" id="practiceWaitDots">ממתינות...</div>
+    </div>
+  `;
+
+  let dots = 0;
+  S._pollInterval = setInterval(async () => {
+    dots = (dots + 1) % 4;
+    const el = document.getElementById("practiceWaitDots");
+    if (el) el.textContent = "ממתינות" + ".".repeat(dots + 1);
+
+    const phase = await serverGetPhase();
+    if (phase === "real") {
+      clearInterval(S._pollInterval);
+      S._pollInterval = null;
+      showRealGameStart();
+    }
+  }, 3000);
+}
+
+// ===== REAL GAME START SCREEN =====
+function showRealGameStart() {
+  document.getElementById("gContent").innerHTML = `
+    <div class="evc" style="text-align:center; padding:32px 16px;">
+      <div class="evi">🚀</div>
+      <div class="evt" style="color:var(--gold); font-size:22px;">עכשיו מתחילות באמת!</div>
+      <div class="evd" style="margin-top:8px;">
+        חוזרות לבחירת הדרקון שלכן<br>והמשחק האמיתי מתחיל!
+      </div>
+    </div>
+  `;
+
+  setTimeout(() => {
+    // איפוס מלא וחזרה לבחירת צוות
+    clearInterval(S.timer);
+    S = {
+      team: null,
+      alloc: { bond: 25, cloud: 25, medi: 25, shield: 25 },
+      origAlloc: null, prevAlloc: null,
+      portfolio: { bond: 25000, cloud: 25000, medi: 25000, shield: 25000 },
+      total: TOTAL, year: -1, changes: 0,
+      totalCommissions: 0, yearHistory: [],
+      timer: null, timeLeft: TIMER_SEC,
+      phase: "alloc", touchedThisYear: false,
+      isPractice: false, // עכשיו משחק אמיתי!
+      _pollInterval: null
+    };
+    document.querySelectorAll(".tb").forEach(b => b.classList.remove("sel"));
+    document.getElementById("startBtn").classList.remove("en");
+    renderTeams();
+    show("scrWelcome");
+  }, 3000);
 }
 
 // ===== WAITING SCREEN =====

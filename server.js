@@ -15,7 +15,8 @@ app.use(express.static(path.join(__dirname))); // מגיש את קבצי הפר�
 let runs = [];
 let progress = [];
 let openYear = 2020;
-let takenTeams = {}; // { teamId: teamName }
+let takenTeams = {};
+let gamePhase = "practice"; // "practice" | "real"
 
 // ===== HEALTH CHECK =====
 app.get("/api/health", (req, res) => {
@@ -42,7 +43,22 @@ app.delete("/api/runs", (req, res) => {
   progress = [];
   openYear = 2020;
   takenTeams = {};
+  gamePhase = "practice";
   res.json({ ok: true });
+});
+
+// ===== GAME PHASE =====
+app.get("/api/phase", (req, res) => {
+  res.json({ phase: gamePhase });
+});
+
+app.post("/api/phase", (req, res) => {
+  if (req.query.pass !== ADMIN_PASS) return res.status(401).json({ error: "Unauthorized" });
+  const { phase } = req.body;
+  if (!["practice", "real"].includes(phase)) return res.status(400).json({ error: "Invalid phase" });
+  gamePhase = phase;
+  takenTeams = {}; // איפוס נעילות כשמתחיל משחק אמיתי
+  res.json({ ok: true, phase: gamePhase });
 });
 
 // ===== TEAM CLAIMING =====

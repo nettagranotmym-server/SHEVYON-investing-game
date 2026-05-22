@@ -1,6 +1,6 @@
 // ===== CONFIG =====
 const TOTAL = 100000;
-const TIMER_SEC = 90;
+const TIMER_SEC = 180; // 3 דקות
 const COMMISSION_RATE = 0.02;
 
 // ===== API BASE =====
@@ -25,10 +25,10 @@ const TEAMS = [
 
 // ===== ASSETS =====
 const ASSETS = [
-  { key: "bond",   name: 'אג"ח',       icon: "🧾", color: "var(--blue)",   bg: "rgba(59,130,246,.15)" },
-  { key: "cloud",  name: "CloudSpark", icon: "☁️", color: "var(--purple)", bg: "rgba(168,85,247,.15)" },
-  { key: "medi",   name: "MediPulse",  icon: "💊", color: "var(--green)",  bg: "rgba(34,197,94,.15)"  },
-  { key: "shield", name: "ShieldWorks",icon: "🛡️", color: "var(--orange)", bg: "rgba(249,115,22,.15)" }
+  { key: "bond",   name: 'אג"ח',        sector: "סולידי",    icon: "🧾", color: "var(--blue)",   bg: "rgba(59,130,246,.15)" },
+  { key: "cloud",  name: "CloudSpark",  sector: "טכנולוגיה", icon: "☁️", color: "var(--purple)", bg: "rgba(168,85,247,.15)" },
+  { key: "medi",   name: "MediPulse",   sector: "רפואה",     icon: "💊", color: "var(--green)",  bg: "rgba(34,197,94,.15)"  },
+  { key: "shield", name: "ShieldWorks", sector: "ביטחון",    icon: "🛡️", color: "var(--orange)", bg: "rgba(249,115,22,.15)" }
 ];
 
 // ===== INTRO =====
@@ -119,6 +119,27 @@ function setAdminOpenYear(year) {
 }
 
 // ===== SERVER API FUNCTIONS =====
+
+// שליפת פאזת המשחק
+async function serverGetPhase() {
+  try {
+    const res = await fetch(`${API_BASE}/api/phase`);
+    const data = await res.json();
+    return data.phase || "practice";
+  } catch (e) {
+    return "practice";
+  }
+}
+
+// עדכון פאזת המשחק (מנהלת)
+async function serverSetPhase(phase, pass) {
+  const res = await fetch(`${API_BASE}/api/phase?pass=${encodeURIComponent(pass)}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ phase })
+  });
+  return res.json();
+}
 
 // שליפת קבוצות תפוסות
 async function serverGetTakenTeams() {

@@ -162,6 +162,18 @@ function bindAdminButtons() {
       alert("שגיאה באיפוס: " + e.message);
     }
   });
+
+  document.getElementById("btnStartReal").addEventListener("click", async () => {
+    const ok = confirm("לפתוח את המשחק האמיתי? הקבוצות יקבלו הודעה אוטומטית להתחיל.");
+    if (!ok) return;
+    try {
+      await serverSetPhase("real", ADMIN_PASS);
+      document.getElementById("btnStartReal").textContent = "✅ המשחק האמיתי פתוח!";
+      document.getElementById("btnStartReal").disabled = true;
+    } catch (e) {
+      alert("שגיאה: " + e.message);
+    }
+  });
 }
 
 // ===== INIT =====
@@ -170,4 +182,9 @@ function bindAdminButtons() {
   bindAdminButtons();
   await renderYearControl();
   await renderAdmin();
+
+  // רענון אוטומטי כל 10 שניות
+  setInterval(async () => {
+    await renderAdmin();
+  }, 10000);
 })();
