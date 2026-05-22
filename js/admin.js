@@ -203,6 +203,7 @@ function bindAdminButtons() {
   await renderYearControl();
   await renderAdmin();
 
+  
   // רענון אוטומטי כל 10 שניות
   setInterval(async () => {
     await renderAdmin();
