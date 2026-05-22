@@ -14,9 +14,9 @@ app.use(express.static(path.join(__dirname))); // מגיש את קבצי הפר�
 // ===== MEMORY STORAGE =====
 let runs = [];
 let progress = [];
-let openYear = 2020;
+let openYear = 0;      // 0 = כלום פתוח, -1 = ניסיון פתוח, 2020+ = שנה אמיתית
 let takenTeams = {};
-let gamePhase = "practice"; // "practice" | "real"
+let gamePhase = "practice";
 
 // ===== HEALTH CHECK =====
 app.get("/api/health", (req, res) => {
@@ -41,7 +41,7 @@ app.delete("/api/runs", (req, res) => {
   if (req.query.pass !== ADMIN_PASS) return res.status(401).json({ error: "Unauthorized" });
   runs = [];
   progress = [];
-  openYear = 2020;
+  openYear = 0;
   takenTeams = {};
   gamePhase = "practice";
   res.json({ ok: true });

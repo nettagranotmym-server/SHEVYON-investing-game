@@ -170,10 +170,10 @@ async function serverGetOpenYear() {
   try {
     const res = await fetch(`${API_BASE}/api/year`);
     const data = await res.json();
-    return typeof data.openYear === "number" ? data.openYear : 2020;
+    return typeof data.openYear === "number" ? data.openYear : 0;
   } catch (e) {
-    console.warn("Could not fetch year from server, using localStorage fallback:", e);
-    return getAdminOpenYear();
+    console.warn("Could not fetch year from server:", e);
+    return 0;
   }
 }
 

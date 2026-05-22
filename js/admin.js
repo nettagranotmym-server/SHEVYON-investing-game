@@ -11,29 +11,61 @@ function requirePassword() {
   return true;
 }
 
-// ===== LESSON CARD =====
+// ===== LESSON CARD - תובנה בלבד =====
 function renderLessonCard(openYear) {
   const card = document.getElementById("lessonCard");
   if (!card) return;
 
-  // מציאת השנה הנוכחית הפתוחה
+  if (openYear === -1) {
+    card.style.display = "block";
+    card.innerHTML = `
+      <div class="lesson-year">🎯 שנת ניסיון פתוחה</div>
+      <div class="lesson-text" style="font-size:16px;">הקבוצות משחקות כעת את שנת הניסיון. לאחר שכולן סיימו — לחצי איפוס ואז פתחי 2020 למשחק האמיתי.</div>
+    `;
+    return;
+  }
+
+  if (openYear <= 0) { card.style.display = "none"; return; }
+
   const yr = YEARS.find(y => y.year === openYear);
   if (!yr) { card.style.display = "none"; return; }
+
+  // מציגים רק את התובנה (אחרי \n\n💡)
+  const lessonParts = yr.lesson.split("\n\n");
+  const insightOnly = lessonParts.length > 1 ? lessonParts[1] : yr.lesson;
 
   card.style.display = "block";
   card.innerHTML = `
     <div class="lesson-year">${yr.icon} ${yr.year}</div>
-    <div class="lesson-title">${yr.title}</div>
-    <div class="lesson-text">${yr.lesson.replace(/\n/g, "<br>")}</div>
+    <div class="lesson-text" style="font-size:18px; line-height:1.8; color:var(--txt);">${insightOnly.replace(/\n/g, "<br>")}</div>
   `;
 }
+
+// ===== YEAR CONTROL =====
 async function renderYearControl() {
   const openYear = await serverGetOpenYear();
-
   const st = document.getElementById("yearStatus");
-  if (st) st.textContent = `פתוח עד: ${openYear}`;
+  if (st) st.textContent = openYear === -1 ? "פתוח: ניסיון" : openYear === 0 ? "טרם נפתח" : `פתוח עד: ${openYear}`;
 
   renderLessonCard(openYear);
+
+  // כפתור ניסיון
+  const practiceBtn = document.getElementById("openPractice");
+  if (practiceBtn) {
+    practiceBtn.disabled = openYear !== 0;
+    practiceBtn.textContent = openYear === -1 ? "✅ ניסיון פתוח" : "🎯 פתחי ניסיון";
+    practiceBtn.onclick = async () => {
+      practiceBtn.disabled = true;
+      practiceBtn.textContent = "פותחת...";
+      try {
+        await serverSetOpenYear(-1, ADMIN_PASS);
+        await renderYearControl();
+      } catch (e) {
+        alert("שגיאה: " + e.message);
+        await renderYearControl();
+      }
+    };
+  }
 
   [2020, 2021, 2022, 2023, 2024].forEach(y => {
     const btn = document.getElementById(`open${y}`);

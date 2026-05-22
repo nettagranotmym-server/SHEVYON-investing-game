@@ -100,26 +100,49 @@ function bindButtons() {
 }
 
 // ===== START =====
-function startGame() {
+async function startGame() {
   if (!S.team) return;
 
   S.alloc = { bond: 25, cloud: 25, medi: 25, shield: 25 };
-  S.origAlloc = null;
-  S.prevAlloc = null;
+  S.origAlloc = null; S.prevAlloc = null;
   S.portfolio = { bond: 25000, cloud: 25000, medi: 25000, shield: 25000 };
-  S.total = TOTAL;
-  S.year = -1;
-  S.changes = 0;
-  S.totalCommissions = 0;
-  S.yearHistory = [];
-  S.touchedThisYear = false;
+  S.total = TOTAL; S.year = -1; S.changes = 0;
+  S.totalCommissions = 0; S.yearHistory = [];
+  S.touchedThisYear = false; S.isPractice = true;
   S._pollInterval = null;
 
   show("scrGame");
   document.getElementById("gTeam").innerHTML = `<span>${S.team.e}</span> ${S.team.n}`;
   document.getElementById("gBal").textContent = fmt(S.total);
+  document.getElementById("gStep").textContent = "⏳ ממתינות לפתיחת הניסיון";
+  document.getElementById("gTitle").textContent = "המנהלת תפתח את הניסיון בקרוב...";
 
-  showAllocScreen();
+  // מחכות שהמנהלת תפתח את הניסיון (openYear = -1)
+  document.getElementById("gContent").innerHTML = `
+    <div class="evc" style="text-align:center; padding:28px 16px;">
+      <div class="evi">⏳</div>
+      <div class="evt" style="color:var(--gold);">ממתינות לפתיחת שנת הניסיון</div>
+      <div class="evd" style="margin-top:8px;">
+        המנהלת תפתח את שנת הניסיון בקרוב.<br>
+        הדף יתעדכן אוטומטית.
+      </div>
+      <div style="margin-top:16px; font-size:11px; color:var(--txt3);" id="practiceOpenDots">בודקות...</div>
+    </div>
+  `;
+
+  let dots = 0;
+  S._pollInterval = setInterval(async () => {
+    dots = (dots + 1) % 4;
+    const el = document.getElementById("practiceOpenDots");
+    if (el) el.textContent = "בודקות" + ".".repeat(dots + 1);
+
+    const openYear = await serverGetOpenYear();
+    if (openYear === -1) {
+      clearInterval(S._pollInterval);
+      S._pollInterval = null;
+      showAllocScreen();
+    }
+  }, 3000);
 }
 
 // ===== TIMER =====
@@ -410,10 +433,34 @@ function showYearResult(yr, details, oldTotal, commission) {
   let commissionHtml = "";
   if (commission > 0) {
     commissionHtml = `<div style="background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.3); border-radius:8px; padding:8px; margin-bottom:10px; text-align:center; font-size:12px;">
-      <span style="color:var(--red)">💸 עמלות קנייה או מכירה: <strong style="font-family:'Rubik',sans-serif;">-${fmt(commission)}</strong></span>
+      <span style="color:var(--red)">💸 עמלות: <strong style="font-family:'Rubik',sans-serif;">-${fmt(commission)}</strong></span>
     </div>`;
   }
 
+  // בשנת ניסיון — מסך פשוט בלי מה קרה
+  if (S.isPractice) {
+    let html = `<div class="yrc">
+      <div class="yr-title">סיכום שנת הניסיון</div>
+      <div class="yr-i">${isPos ? "📈" : "📉"}</div>
+      <div class="yr-ch ${isPos ? "pos" : "neg"}">${isPos ? "+" : ""}${change.toFixed(1)}%</div>
+      ${commissionHtml}
+      <div class="yr-ex" style="font-size:15px; text-align:center; padding:16px;">
+        🎉 כל הכבוד! הבנתן איך לתפעל את המשחק.<br><br>
+        <strong style="color:var(--gold);">עכשיו מתחילות לשחק באמת!</strong><br><br>
+        ממתינות למנהלת שתפתח את המשחק האמיתי.
+      </div>
+      <div class="yr-bal">
+        <div class="yr-bl">שווי התיק בניסיון</div>
+        <div class="yr-bv">${fmt(S.total)}</div>
+      </div>
+      <button class="nbtn" id="nextBtn">אני מוכנה! ⏳</button>
+    </div>`;
+    document.getElementById("gContent").innerHTML = html;
+    document.getElementById("nextBtn").addEventListener("click", () => nextYear());
+    return;
+  }
+
+  // משחק אמיתי — מסך מלא
   let html = `<div class="yrc">
     <div class="yr-title">סיכום שנה בתיק ההשקעות שלך</div>
     <div class="yr-i">${isPos ? "📈" : "📉"}</div>
@@ -437,7 +484,6 @@ function showYearResult(yr, details, oldTotal, commission) {
   });
 
   const isLastYear = S.year >= 4;
-
   html += `</div>
     <div class="yr-bal">
       <div class="yr-bl">שווי התיק</div>
@@ -449,7 +495,6 @@ function showYearResult(yr, details, oldTotal, commission) {
   </div>`;
 
   document.getElementById("gContent").innerHTML = html;
-
   document.getElementById("nextBtn").addEventListener("click", () => nextYear());
 }
 
@@ -478,7 +523,7 @@ async function nextYear() {
   const nextYearValue = YEARS[nextIndex].year;
   const openYear = await serverGetOpenYear();
 
-  if (nextYearValue > openYear) {
+  if (nextYearValue > openYear || openYear <= 0) {
     showWaitingForAdmin(nextYearValue, nextIndex);
     return;
   }
