@@ -496,8 +496,8 @@ function showPracticeWaiting() {
       <div class="evt" style="color:var(--gold);">כל הכבוד! סיימתן את הניסיון</div>
       <div class="evd" style="margin-top:8px;">
         עכשיו אתן יודעות איך המשחק עובד!<br><br>
-        המנהלת תאפס את הנתונים ותפתח את המשחק האמיתי.<br>
-        הדף יתעדכן אוטומטית.
+        המנהלת תאפס את הנתונים ותפתח את שנת 2020 האמיתית.<br>
+        הדף יתעדכן אוטומטית — אין צורך לרענן.
       </div>
       <div style="margin-top:20px; font-size:11px; color:var(--txt3);" id="practiceWaitDots">ממתינות...</div>
     </div>
@@ -509,8 +509,8 @@ function showPracticeWaiting() {
     const el = document.getElementById("practiceWaitDots");
     if (el) el.textContent = "ממתינות" + ".".repeat(dots + 1);
 
-    const phase = await serverGetPhase();
-    if (phase === "real") {
+    const openYear = await serverGetOpenYear();
+    if (openYear >= 2020) {
       clearInterval(S._pollInterval);
       S._pollInterval = null;
       showRealGameStart();
