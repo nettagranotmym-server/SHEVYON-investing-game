@@ -53,6 +53,14 @@ async function selTeam(id) {
     return;
   }
 
+  // נועלים מיידית בבחירה
+  const ok = await serverClaimTeam(id, TEAMS.find(t => t.id === id)?.n);
+  if (!ok) {
+    alert("הדרקון הזה כבר נבחר! בחרי דרקון אחר 🔒");
+    renderTeams();
+    return;
+  }
+
   S.team = TEAMS.find(t => t.id === id) || null;
   document.querySelectorAll(".tb").forEach(b => b.classList.remove("sel"));
   const chosen = document.querySelector(`.tb[data-id="${id}"]`);
@@ -86,15 +94,6 @@ function bindButtons() {
   });
   document.getElementById("goToGameBtn").addEventListener("click", async () => {
     if (!S.team) return;
-    const ok = await serverClaimTeam(S.team.id, S.team.n);
-    if (!ok) {
-      alert(`${S.team.n} כבר נתפסה! בחרו דרקון אחר.`);
-      S.team = null;
-      document.getElementById("startBtn").classList.remove("en");
-      show("scrWelcome");
-      renderTeams();
-      return;
-    }
     startGame();
   });
   document.getElementById("restartBtn").addEventListener("click", restart);
