@@ -464,11 +464,10 @@ function showYearResult(yr, details, oldTotal, commission) {
   // משחק אמיתי — מסך מלא
   let html = `<div class="yrc">
     <div class="yr-title">סיכום שנה בתיק ההשקעות שלך</div>
-    <div class="yr-i">${isPos ? "📈" : "📉"}</div>
-    <div class="yr-ch ${isPos ? "pos" : "neg"}">${isPos ? "+" : ""}${change.toFixed(1)}%</div>
+    <div class="yr-ch ${isPos ? "pos" : "neg"}" style="font-size:26px; margin-bottom:6px;">${isPos ? "+" : ""}${change.toFixed(1)}%</div>
     ${commissionHtml}
-    <div class="yr-ex">${yr.lesson.replace(/\n/g, "<br>")}</div>
-    <div class="yr-bd">
+    <div class="yr-ex" style="padding:8px 10px; margin-bottom:8px;">${yr.lesson.replace(/\n/g, "<br>")}</div>
+    <div class="yr-bd" style="margin-bottom:8px;">
   `;
 
   details.forEach(d => {
@@ -486,7 +485,7 @@ function showYearResult(yr, details, oldTotal, commission) {
 
   const isLastYear = S.year >= 4;
   html += `</div>
-    <div class="yr-bal">
+    <div class="yr-bal" style="padding:8px; margin-bottom:8px;">
       <div class="yr-bl">שווי התיק</div>
       <div class="yr-bv">${fmt(S.total)}</div>
     </div>
