@@ -60,7 +60,7 @@ async function selTeam(id) {
   document.getElementById("startBtn").classList.add("en");
 }
 
-// פולינג לעדכון נעילות כל 2 שניות (מהיר יותר)
+// פולינג לעדכון נעילות כל 2 שניות — רק מעדכן כפתורים שנתפסו
 function startTeamPolling() {
   setInterval(async () => {
     const grid = document.getElementById("teamGrid");
@@ -69,10 +69,11 @@ function startTeamPolling() {
     TEAMS.forEach(t => {
       const btn = document.querySelector(`.tb[data-id="${t.id}"]`);
       if (!btn) return;
-      if (taken[t.id] && !btn.classList.contains("sel")) {
+      if (taken[t.id] && !btn.classList.contains("sel") && !btn.classList.contains("tb-taken")) {
         btn.classList.add("tb-taken");
         btn.disabled = true;
-        btn.querySelector(".te").textContent = "🔒";
+        const teEl = btn.querySelector(".te");
+        if (teEl) teEl.textContent = "🔒";
       }
     });
   }, 2000);
