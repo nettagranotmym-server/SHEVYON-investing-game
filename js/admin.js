@@ -171,8 +171,9 @@ async function renderAdmin() {
         }
       });
       // סופי
+      const maxFinal = Math.max(...Array.from(latestRuns.values()).map(r => r.finalTotal || 0));
       cells[years.length + 1].innerHTML = fin
-        ? `<span style="font-weight:900; color:var(--gold);">${fmt(fin.finalTotal)}</span>`
+        ? `<span style="font-weight:900; color:var(--gold);">${fmt(fin.finalTotal)}${fin.finalTotal === maxFinal && maxFinal > 0 ? " 🏆" : ""}</span>`
         : "—";
     });
 
