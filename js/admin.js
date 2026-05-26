@@ -161,8 +161,14 @@ async function renderAdmin() {
       `;
       // שנים
       years.forEach((y, i) => {
+        const yt = src?.yearTotals?.find(t => t.year === y);
         const val = byYear.get(y);
-        cells[i + 1].textContent = typeof val === "number" ? fmt(val) : "—";
+        if (typeof val === "number") {
+          const advanced = yt?.advanced === true;
+          cells[i + 1].innerHTML = `<span style="${advanced ? "text-decoration:underline; text-underline-offset:4px;" : ""}">${fmt(val)}</span>`;
+        } else {
+          cells[i + 1].textContent = "—";
+        }
       });
       // סופי
       cells[years.length + 1].innerHTML = fin
@@ -203,7 +209,6 @@ function bindAdminButtons() {
   await renderYearControl();
   await renderAdmin();
 
-  
   // רענון אוטומטי כל 10 שניות
   setInterval(async () => {
     await renderAdmin();
