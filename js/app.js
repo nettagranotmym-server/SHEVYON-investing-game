@@ -403,10 +403,11 @@ function applyYear(changed, commission, doRebalance = true) {
       teamEmoji: S.team.e,
       currentYear: yr.year,
       totalNow: S.total,
-      yearTotals: S.yearHistory.map(y => ({ year: y.year, totalAfter: y.totalAfter }))
+      confirmedYear: yr.year,  // אישרה את השנה
+      advancedYear: null,       // עדיין לא לחצה "לשנה הבאה"
+      yearTotals: S.yearHistory.map(y => ({ year: y.year, totalAfter: y.totalAfter, advanced: false }))
     });
   } else {
-    // בניסיון — שומרים עם סימון ניסיון
     upsertTeamProgress({
       ts: Date.now(),
       teamId: S.team.id,
@@ -415,7 +416,7 @@ function applyYear(changed, commission, doRebalance = true) {
       currentYear: yr.year,
       totalNow: S.total,
       isPractice: true,
-      yearTotals: S.yearHistory.map(y => ({ year: y.year, totalAfter: y.totalAfter }))
+      yearTotals: S.yearHistory.map(y => ({ year: y.year, totalAfter: y.totalAfter, advanced: false }))
     });
   }
 
@@ -500,6 +501,23 @@ function showYearResult(yr, details, oldTotal, commission) {
 
 // ===== NEXT YEAR (בדיקת שרת) =====
 async function nextYear() {
+  // סימון שעברה לשנה הבאה
+  if (!S.isPractice && S.year >= 0) {
+    const prog = {
+      ts: Date.now(),
+      teamId: S.team.id,
+      teamName: S.team.n,
+      teamEmoji: S.team.e,
+      currentYear: YEARS[S.year].year,
+      totalNow: S.total,
+      yearTotals: S.yearHistory.map(y => ({
+        year: y.year,
+        totalAfter: y.totalAfter,
+        advanced: y.year === YEARS[S.year].year ? true : (y.advanced || false)
+      }))
+    };
+    upsertTeamProgress(prog);
+  }
   if (S._pollInterval) {
     clearInterval(S._pollInterval);
     S._pollInterval = null;
