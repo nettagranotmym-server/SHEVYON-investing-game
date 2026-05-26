@@ -60,7 +60,7 @@ async function selTeam(id) {
   document.getElementById("startBtn").classList.add("en");
 }
 
-// פולינג לעדכון נעילות כל 5 שניות
+// פולינג לעדכון נעילות כל 2 שניות (מהיר יותר)
 function startTeamPolling() {
   setInterval(async () => {
     const grid = document.getElementById("teamGrid");
@@ -75,7 +75,7 @@ function startTeamPolling() {
         btn.querySelector(".te").textContent = "🔒";
       }
     });
-  }, 5000);
+  }, 2000);
 }
 
 function bindButtons() {

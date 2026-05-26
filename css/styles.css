@@ -138,23 +138,23 @@ body {
 .tsa { width: 100%; animation: fiu .5s ease-out .2s both; }
 .tsl { font-size: 15px; font-weight: 700; margin-bottom: 10px; color: var(--gold); }
 
-.tg { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+.tg { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 14px; }
 
 .tb {
   background: var(--card);
   border: 2px solid var(--brd2);
   border-radius: 10px;
-  padding: 10px 4px;
+  padding: 8px 2px;
   color: var(--txt);
   font-family: 'Heebo', sans-serif;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   cursor: pointer;
   transition: .25s;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   position: relative;
   overflow: hidden;
 }
