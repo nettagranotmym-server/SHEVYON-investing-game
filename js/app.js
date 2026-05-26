@@ -572,7 +572,7 @@ function showRealGameStart() {
       <div class="evt" style="color:var(--gold); font-size:22px;">עכשיו מתחילות באמת!</div>
       <div class="evd" style="margin-top:8px;">
         המשחק האמיתי מתחיל עכשיו —<br>
-        אותה קבוצה, מתחילות מ-2020 מחדש!
+        אותו דרקון, מתחילות מ-2020 מחדש!
       </div>
     </div>
   `;
